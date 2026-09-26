@@ -1,0 +1,21 @@
+{
+  "name": "Zara - Personal AI Companion",
+  "short_name": "Zara",
+  "description": "Your caring, proactive personal AI assistant with dark mode and voice companion.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#12161F",
+  "theme_color": "#12161F",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/4712/4712109.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

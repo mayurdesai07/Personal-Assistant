@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#12161F">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Zara AI">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/4712/4712109.png">
+
+  <title>My Personal AI - Zara</title>
+  
+  <!-- Google Fonts: Quicksand & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Custom Dark Mode CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-viewport">
+    
+    <!-- Top Bar Navigation -->
+    <header class="app-header glass-card">
+      <div class="brand-info">
+        <div class="assistant-avatar">
+          <i class="fa-solid fa-sparkles"></i>
+        </div>
+        <div>
+          <h1 id="brand-title" class="brand-name">Zara</h1>
+          <span class="online-badge" id="online-status-badge"><span class="dot"></span> Online Companion Active</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button id="voice-activation-btn" class="icon-button" onclick="toggleVoiceWakeWord()" title="Toggle Voice Wake Word Activation">
+          <i class="fa-solid fa-microphone"></i>
+        </button>
+        <button id="open-settings-btn" class="icon-button" onclick="openSettings()" aria-label="Settings">
+          <i class="fa-solid fa-sliders"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Scrollable Area -->
+    <main class="app-content">
+
+      <!-- Hero Greeting Section -->
+      <section class="hero-card glass-card">
+        <div class="hero-header">
+          <div>
+            <span class="date-chip" id="current-date">Saturday, Sep 26</span>
+            <h2 class="greeting-text">Good day, <span id="user-display-name">Mayur</span>! 👋</h2>
+          </div>
+          <div class="tone-indicator-pill" id="active-tone-badge">
+            <i class="fa-solid fa-heart"></i> <span id="tone-badge-text">Friendly Mode</span>
+          </div>
+        </div>
+        <p class="hero-subtext" id="hero-summary-text">Loading your daily briefing...</p>
+      </section>
+
+      <!-- Quick Capture from Anywhere Card -->
+      <section class="section-card glass-card" id="quick-capture-section" style="border: 1px solid rgba(224, 122, 95, 0.4);">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-bolt" style="color: var(--primary-terracotta);"></i> Quick Capture from Anywhere</h3>
+        </div>
+        <p class="section-subtext">Type or paste text (e.g. <em>"Rahul's birthday on October 14th; buy a gift"</em>). Zara organizes it for your approval!</p>
+        
+        <div class="add-task-row">
+          <input type="text" id="quick-capture-input" placeholder="e.g. Rahul's birthday on October 14th; buy gift" onkeypress="handleQuickCaptureKeyPress(event)">
+          <button class="small-add-btn" style="width: auto; padding: 0 16px; border-radius: 9999px;" onclick="processQuickCapture()"><i class="fa-solid fa-wand-magic-sparkles"></i> Parse</button>
+        </div>
+      </section>
+
+      <!-- Active Monitoring & System Hardware Settings Banner -->
+      <section class="status-banner glass-card" id="voice-location-banner">
+        <div class="status-banner-info">
+          <i class="fa-solid fa-heart-pulse" style="color: var(--primary-terracotta);"></i>
+          <div>
+            <strong>Zara Companion & Soothing Voice Standby</strong>
+            <div id="location-status-text" style="font-size: 0.75rem; color: var(--text-muted);">Self-learning active • Soothing Voice • Offline PWA Ready</div>
+          </div>
+        </div>
+        <button class="small-outline-btn" style="padding: 2px 8px; font-size: 0.7rem;" onclick="openSystemSettingsModal()">Shortcuts</button>
+      </section>
+
+      <!-- Zara's Interactive Calendar & Birthday Tracker Section -->
+      <section class="section-card glass-card" id="calendar-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-calendar-days" style="color: var(--accent-sage);"></i> Zara's Calendar & Birthday Tracker</h3>
+          <button class="small-outline-btn" onclick="toggleAddEventForm()"><i class="fa-solid fa-plus"></i> Add Event</button>
+        </div>
+        <p class="section-subtext">Auto-scans Gmail for exam dates and reminds you 30 days before upcoming birthdays!</p>
+
+        <!-- New Event Input Box -->
+        <div id="add-event-card" class="add-doc-box hidden">
+          <input type="text" id="event-title-input" placeholder="Event Title (e.g. Rahul's Birthday 🎂)" required>
+          <select id="event-type-select" class="small-select" style="width:100%; padding:10px; margin-bottom:10px;">
+            <option value="Birthday">Birthday 🎂</option>
+            <option value="Exam">Exam 📝</option>
+            <option value="Event">Event 📅</option>
+          </select>
+          <input type="date" id="event-date-input" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); color:#FFF; margin-bottom:10px;" required>
+          <input type="number" id="event-reminder-input" placeholder="Reminder Days in Advance (default: 30)" value="30" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); color:#FFF; margin-bottom:10px;">
+          <div class="doc-btn-row">
+            <button class="small-save-btn" onclick="saveNewEvent()">Save Event</button>
+            <button class="small-cancel-btn" onclick="toggleAddEventForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Event List Container -->
+        <div class="integration-cards-list" id="events-list-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- Zara's Self-Learned Memory Section -->
+      <section class="section-card glass-card" id="memory-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-brain" style="color: var(--accent-amber);"></i> Zara's Self-Learned Memory</h3>
+          <button class="small-outline-btn" onclick="toggleAddMemoryForm()"><i class="fa-solid fa-plus"></i> Learn Fact</button>
+        </div>
+        <p class="section-subtext">Zara learns your routine, favorite foods, study habits, and life goals over time.</p>
+
+        <!-- New Memory Input Box -->
+        <div id="add-memory-card" class="add-doc-box hidden">
+          <select id="memory-category-select" class="small-select" style="width:100%; padding:10px; margin-bottom:10px;">
+            <option value="Routine">Routine</option>
+            <option value="Food Preference">Food Preference</option>
+            <option value="Habit">Habit</option>
+            <option value="Goal">Goal</option>
+          </select>
+          <input type="text" id="memory-fact-input" placeholder="Fact (e.g. Likes eating Biryani while studying)" required>
+          <div class="doc-btn-row">
+            <button class="small-save-btn" onclick="saveNewMemory()">Teach Zara</button>
+            <button class="small-cancel-btn" onclick="toggleAddMemoryForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Memory List Container -->
+        <div class="doc-list" id="memory-list-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- Today's Focus & Next Event Widget Grid -->
+      <section class="widget-grid" id="schedule-widget-container">
+        <!-- Next Class Widget -->
+        <div class="widget-card glass-card accent-border-sage">
+          <div class="widget-header">
+            <span class="widget-label"><i class="fa-solid fa-clock"></i> Next Up</span>
+            <span class="time-badge" id="next-event-time">10:30 AM</span>
+          </div>
+          <h3 class="widget-title" id="next-event-title">Data Structures Lecture</h3>
+          <p class="widget-sub" id="next-event-location"><i class="fa-solid fa-location-dot"></i> Hall B - Room 204</p>
+        </div>
+
+        <!-- Class Checklist Widget -->
+        <div class="widget-card glass-card accent-border-terracotta">
+          <div class="widget-header">
+            <span class="widget-label"><i class="fa-solid fa-bag-shopping"></i> Class Checklist</span>
+            <span class="count-badge" id="checklist-count">4 items</span>
+          </div>
+          <div class="checklist-pills" id="checklist-container">
+            <span class="checklist-tag"><i class="fa-solid fa-check"></i> Laptop & Charger</span>
+            <span class="checklist-tag"><i class="fa-solid fa-check"></i> Student ID</span>
+            <span class="checklist-tag"><i class="fa-solid fa-check"></i> Notebook & Pen</span>
+            <span class="checklist-tag"><i class="fa-solid fa-check"></i> Water Bottle</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Quick Contacts & Calling Section -->
+      <section class="section-card glass-card" id="contacts-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-address-book"></i> Quick Contacts & Calling</h3>
+          <button class="small-outline-btn" onclick="toggleAddContactForm()"><i class="fa-solid fa-plus"></i> Add Contact</button>
+        </div>
+        <p class="section-subtext">Direct one-tap Phone call or WhatsApp messaging links.</p>
+
+        <!-- New Contact Input Box -->
+        <div id="add-contact-card" class="add-doc-box hidden">
+          <input type="text" id="contact-name-input" placeholder="Contact Name (e.g. Rahul)" required>
+          <input type="tel" id="contact-phone-input" placeholder="Phone Number (e.g. +919876543210)" required>
+          <div class="doc-btn-row">
+            <button class="small-save-btn" onclick="saveNewContact()">Save Contact</button>
+            <button class="small-cancel-btn" onclick="toggleAddContactForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Contacts List Container -->
+        <div class="integration-cards-list" id="contacts-list-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- Tasks Section -->
+      <section class="section-card glass-card" id="tasks-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-list-check"></i> Today's Tasks</h3>
+          <span class="task-counter" id="task-counter-text">0 of 0 done</span>
+        </div>
+
+        <ul class="task-list" id="task-list-container">
+          <!-- Dynamic Task Items from LocalStorage -->
+        </ul>
+
+        <!-- Add Task Quick Input -->
+        <div class="add-task-form">
+          <div class="add-task-row">
+            <input type="text" id="new-task-input" placeholder="+ Add task title..." onkeypress="handleTaskKeyPress(event)">
+            <select id="new-task-priority" class="small-select">
+              <option value="High">High</option>
+              <option value="Medium" selected>Med</option>
+              <option value="Low">Low</option>
+            </select>
+            <button class="small-add-btn" onclick="addNewTask()"><i class="fa-solid fa-plus"></i></button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Connected Services Section -->
+      <section class="section-card glass-card" id="integrations-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-link"></i> Connected Services & Privacy</h3>
+          <span class="online-badge"><i class="fa-solid fa-shield-halved"></i> Active</span>
+        </div>
+        <p class="section-subtext">Connected services for Gmail, College ERP, NxtWave & WhatsApp.</p>
+
+        <div class="integration-cards-list">
+          
+          <!-- Gmail Integration Card -->
+          <div class="integration-item-card">
+            <div class="integration-info">
+              <div class="integration-icon gmail-icon"><i class="fa-envelope fa-solid"></i></div>
+              <div>
+                <div class="integration-name">Gmail Exam & Deadlines Scanner</div>
+                <div class="integration-desc" id="gmail-status-text">Connected (mayurcdesai07@gmail.com)</div>
+              </div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button class="small-outline-btn" style="border-color: var(--accent-amber); color: var(--accent-amber);" onclick="scanGmailForExams()"><i class="fa-solid fa-magnifying-glass"></i> Scan Exams</button>
+              <button class="small-outline-btn" id="gmail-toggle-btn" onclick="toggleGmailConnect()">Disconnect</button>
+            </div>
+          </div>
+
+          <!-- College ERP Card -->
+          <div class="integration-item-card">
+            <div class="integration-info">
+              <div class="integration-icon erp-icon"><i class="fa-graduation-cap fa-solid"></i></div>
+              <div>
+                <div class="integration-name">College ERP Portal</div>
+                <div class="integration-desc">Official Timetable & Lab Upload Portal</div>
+              </div>
+            </div>
+            <button class="small-outline-btn" onclick="openErpSubmitModal()"><i class="fa-solid fa-upload"></i> Submit File</button>
+          </div>
+
+          <!-- NxtWave Card -->
+          <div class="integration-item-card">
+            <div class="integration-info">
+              <div class="integration-icon nxtwave-icon"><i class="fa-code fa-solid"></i></div>
+              <div>
+                <div class="integration-name">NxtWave Student Portal</div>
+                <div class="integration-desc">85% completed in React & Python Specialization</div>
+              </div>
+            </div>
+            <button class="small-outline-btn" style="border-color: var(--accent-sage); color: var(--accent-sage);" onclick="launchNxtWavePortal()"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open NxtWave</button>
+          </div>
+
+          <!-- WhatsApp Forward Card -->
+          <div class="integration-item-card">
+            <div class="integration-info">
+              <div class="integration-icon whatsapp-icon"><i class="fa-whatsapp fa-brands"></i></div>
+              <div>
+                <div class="integration-name">WhatsApp Message Hub</div>
+                <div class="integration-desc">Forward messages or send quick WhatsApp texts</div>
+              </div>
+            </div>
+            <button class="small-outline-btn" style="border-color: #25D366; color: #25D366;" onclick="openWhatsAppForwardModal()"><i class="fa-brands fa-whatsapp"></i> WhatsApp Hub</button>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Notes & Documents Section -->
+      <section class="section-card glass-card" id="documents-section">
+        <div class="section-header">
+          <h3><i class="fa-solid fa-folder-open"></i> Notes & Documents</h3>
+          <button class="small-outline-btn" onclick="toggleAddDocForm()"><i class="fa-solid fa-plus"></i> Add Note</button>
+        </div>
+        <p class="section-subtext">The AI assistant searches these materials offline or online to answer your questions.</p>
+
+        <!-- New Document Form -->
+        <div id="add-doc-card" class="add-doc-box hidden">
+          <input type="text" id="doc-title-input" placeholder="Note Title (e.g. DBMS Submission Rules)" required>
+          <input type="text" id="doc-filename-input" placeholder="Filename (e.g. dbms_rules.txt)" required>
+          <textarea id="doc-content-input" placeholder="Paste your note or syllabus content here..." rows="3" required></textarea>
+          <div class="doc-btn-row">
+            <button class="small-save-btn" onclick="saveNewDocument()">Save Note</button>
+            <button class="small-cancel-btn" onclick="toggleAddDocForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Document List Container -->
+        <div class="doc-list" id="doc-list-container">
+          <!-- Populated dynamically -->
+        </div>
+      </section>
+
+      <!-- Interactive Assistant Chat Section -->
+      <section class="chat-section glass-card" id="chat-section">
+        <div class="chat-header">
+          <h3><i class="fa-solid fa-comments"></i> Ask <span id="chat-assistant-name">Zara</span></h3>
+        </div>
+
+        <!-- Quick Question Suggestions -->
+        <div class="quick-chips">
+          <button class="chip-btn" onclick="sendQuickPrompt('How is your day going?')">👋 How are you?</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Check NxtWave course progress')">🚀 NxtWave Progress</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Check Gmail for exam dates')">📧 Exam Dates</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('What have you learned about me?')">🧠 Zara's Memory</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('Upcoming birthdays')">🎂 Birthday Calendar</button>
+          <button class="chip-btn" onclick="sendQuickPrompt('I am hungry, suggest food')">🍲 Suggest Food</button>
+        </div>
+
+        <!-- Chat Messages Container -->
+        <div class="chat-messages" id="chat-messages-container">
+          <!-- Initial Assistant Message -->
+          <div class="message assistant-msg">
+            <div class="msg-avatar"><i class="fa-solid fa-sparkles"></i></div>
+            <div class="msg-bubble" id="welcome-chat-bubble">
+              Hi Mayur! I'm Zara. I'm your caring companion, ready with soothing voice, calendar reminders, NxtWave course tracking, and Gmail exam scanner. How are you feeling today?
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="chat-form" class="chat-input-form" onsubmit="handleChatSubmit(event)">
+          <input type="text" id="chat-input" placeholder="Talk to Zara..." autocomplete="off" required>
+          <button type="submit" class="send-btn" aria-label="Send">
+            <i class="fa-solid fa-paper-plane"></i>
+          </button>
+        </form>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar for Mobile Feel -->
+    <nav class="bottom-nav glass-card">
+      <button class="nav-item active" onclick="scrollToTop()">
+        <i class="fa-solid fa-house"></i>
+        <span>Home</span>
+      </button>
+      <button class="nav-item" onclick="scrollToChat()">
+        <i class="fa-solid fa-message"></i>
+        <span>Chat</span>
+      </button>
+      <button class="nav-item" onclick="scrollToDocs()">
+        <i class="fa-solid fa-folder"></i>
+        <span>Notes</span>
+      </button>
+      <button class="nav-item" onclick="openSettings()">
+        <i class="fa-solid fa-gear"></i>
+        <span>Settings</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- Quick Capture Confirmation Modal -->
+  <div id="quick-capture-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-wand-magic-sparkles" style="color: var(--primary-terracotta);"></i> Confirm Quick Capture</h3>
+        <button class="close-btn" onclick="closeQuickCaptureModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">Review suggested classification before saving:</p>
+        
+        <div class="setting-group">
+          <label>Suggested Category</label>
+          <select id="qc-category-select" class="small-select" style="width:100%; padding:10px;">
+            <option value="Appointment / Class">Appointment / Class</option>
+            <option value="Task">Task</option>
+            <option value="Reminder">Reminder</option>
+            <option value="Checklist Item">Checklist Item</option>
+          </select>
+        </div>
+
+        <div class="setting-group">
+          <label>Title</label>
+          <input type="text" id="qc-title-input" required>
+        </div>
+
+        <div class="setting-group">
+          <label>Suggested Time</label>
+          <input type="text" id="qc-time-input">
+        </div>
+
+        <div class="setting-group" id="qc-checklist-group">
+          <label>Checklist Items</label>
+          <input type="text" id="qc-checklist-input" placeholder="e.g. bring lab record">
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 10px;">
+        <button class="save-btn" style="background: var(--text-muted);" onclick="closeQuickCaptureModal()">Cancel</button>
+        <button class="save-btn" onclick="confirmSaveQuickCapture()">Confirm & Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Preferences Modal -->
+  <div id="settings-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-sliders"></i> Preferences</h3>
+        <button class="close-btn" onclick="closeSettings()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="modal-body">
+        
+        <div class="setting-group">
+          <label for="assistant-name-input">Assistant Name</label>
+          <input type="text" id="assistant-name-input" value="Zara" placeholder="e.g. Zara">
+          <span class="setting-help">Say "Zara" to activate hands-free voice.</span>
+        </div>
+
+        <div class="setting-group">
+          <label for="user-name-input">Your Preferred Name</label>
+          <input type="text" id="user-name-input" value="Mayur" placeholder="Your name">
+        </div>
+
+        <div class="setting-group">
+          <label for="tone-select">Tone Style</label>
+          <select id="tone-select" class="small-select" style="width: 100%; padding: 10px;">
+            <option value="friendly" selected>Warm & Caring Parent</option>
+            <option value="playful">Playful & Witty</option>
+          </select>
+        </div>
+
+        <div class="setting-group" style="margin-top: 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px;">
+          <label><i class="fa-solid fa-shield-halved"></i> Data & Privacy Control</label>
+          <p class="setting-help">Reset all data to fresh initial defaults.</p>
+          <button class="save-btn" style="background: #D90429; margin-top: 8px;" onclick="deleteAllData()">Reset All My Data</button>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button class="save-btn" onclick="saveSettings()">Save Preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- System Shortcuts Modal -->
+  <div id="system-settings-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-sliders"></i> Device Shortcuts</h3>
+        <button class="close-btn" onclick="closeSystemSettingsModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 14px;">
+          Quick device settings & battery checker:
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <button class="save-btn" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);" onclick="checkBatteryStatus()">
+            <i class="fa-solid fa-battery-half"></i> Check Battery Charge
+          </button>
+          
+          <a href="intent:#Intent;action=android.settings.LOCATION_SOURCE_SETTINGS;end" target="_blank" class="save-btn" style="background: rgba(255,255,255,0.1); text-decoration: none; text-align: center; border: 1px solid rgba(255,255,255,0.2);">
+            <i class="fa-solid fa-location-dot"></i> Open Location Settings
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="save-btn" style="background: var(--text-muted);" onclick="closeSystemSettingsModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ERP File Submission Modal -->
+  <div id="erp-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-file-arrow-up"></i> ERP Submission Confirmation</h3>
+        <button class="close-btn" onclick="closeErpModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body" id="erp-modal-body">
+        <div style="background: rgba(0,0,0,0.3); padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid rgba(255,255,255,0.08);">
+          <p><strong>Assignment:</strong> DBMS Lab Sheet 4</p>
+          <p><strong>Course:</strong> Database Management Systems</p>
+          <p><strong>Destination:</strong> Official College ERP Portal</p>
+          <p><strong>Selected File:</strong> <span id="erp-selected-file">dbms_lab_submission.pdf</span></p>
+          <p><strong>Deadline:</strong> Today, 5:00 PM</p>
+        </div>
+        <p style="font-size: 0.85rem; color: var(--text-muted);">Confirm uploading file to your college portal.</p>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 10px;">
+        <button class="save-btn" style="background: var(--text-muted);" onclick="closeErpModal()">Cancel</button>
+        <button class="save-btn" onclick="confirmErpUpload()">Confirm & Upload</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WhatsApp Forward Modal -->
+  <div id="whatsapp-modal" class="modal-overlay hidden">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3><i class="fa-brands fa-whatsapp" style="color: #34D399;"></i> Share Message to Zara</h3>
+        <button class="close-btn" onclick="closeWhatsAppModal()"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 12px;">Paste or forward a message content to store it in Zara's memory.</p>
+        <input type="text" id="wa-sender-input" placeholder="Sender Name (e.g. Class Rep / Prof. Sharma)" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); color:#FFF; margin-bottom:10px;" required>
+        <textarea id="wa-text-input" placeholder="Paste the message content here..." rows="4" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.1); background:rgba(0,0,0,0.3); color:#FFF;" required></textarea>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 10px;">
+        <button class="save-btn" style="background: var(--text-muted);" onclick="closeWhatsAppModal()">Cancel</button>
+        <button class="save-btn" style="background: #059669;" onclick="saveWhatsAppForward()">Save to Zara Notes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone Javascript -->
+  <script src="app.js"></script>
+</body>
+</html>
